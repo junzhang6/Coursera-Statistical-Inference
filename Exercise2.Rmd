@@ -1,0 +1,103 @@
+---
+title: "Coursera Statistical Inference Project"
+author: "Jiajun Zhang"
+date: "October 12, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+# Part 2: Inferential Data Analysis
+
+### Data Loading and Basic Exploratory Data analysis
+
+ - First, we will load the `ToothGrowth` data directly since it is stored inside the R library. 
+ - The dataset is about the effect of vitamin C on tooth growth in guinea pig. This dataset has 60 observations on 3 variables. 
+```{r}
+data(ToothGrowth)
+dim(ToothGrowth)
+head(ToothGrowth)
+```
+
+ - Our response is the `len` variable, and we can make a histogram to see how they distributed.
+```{r, fig.height=3, fig.width=6}
+hist(ToothGrowth$len, breaks=30, xlab="Tooth Length", 
+     main="Histogram of Guinea Pigs' Tooth Length", cex.main=0.8)
+```
+ 
+
+### Basic Summary of the Data
+```{r}
+str(ToothGrowth)
+summary(ToothGrowth)
+sd(ToothGrowth$len)
+table(ToothGrowth$dose)
+ToothGrowth$dose <- as.factor(ToothGrowth$dose)
+```
+
+ - The variables in this dataset are `len`, `supp`, and `dose`, which stand for tooth length, supplement type, and dose in milligrams per day. The variables `len` and `dose` are numeric, and `supp` is a factor with 2 levels, VC or OJ. 
+ - From the summary of the data, we can see that the mean of our response `len` is 18.81 and standard deviation is 7.65. 
+ - Also, we shall see that the variable `dose` has only 3 unique values: 0.5, 1, and 2. So, we can convert it to a factor. 
+ - Then, we can produce some graphs of the response `len` based on `supp` and `dose`.
+ 
+```{r, fig.height=4, fig.width=6}
+ggplot(ToothGrowth, aes(supp, len, color=supp)) + geom_boxplot() + 
+      labs(x="Supplement Type", y="Tooth Length", 
+           title="Tooth Length by Supplement Type") + 
+      theme(plot.title=element_text(hjust=0.5))
+
+ggplot(ToothGrowth, aes(dose, len, color=dose)) + geom_boxplot() + 
+      labs(x="Dose in mgs/day", y="Tooth Length", 
+           title="Tooth Length by Dose") + 
+      theme(plot.title=element_text(hjust=0.5))
+```
+ 
+### Hypothesis Tests to Compare Tooth Growth By Supp and Dose
+
+ - From the previous plots we can sort of see some differences in tooth length between doses and a slightly difference in tooth length between 2 supplement types. 
+ - Now, we can perform two sample t-tests on supplements and doses by stating our hypotheses as:  
+  $H_{0}$: difference in means equal to 0  
+  $H_{a}$: difference in means is not equal to 0  
+  
+```{r}
+VC <- filter(ToothGrowth, supp=="VC")
+OJ <- filter(ToothGrowth, supp=="OJ")
+t.test(VC$len, OJ$len)
+```
+
+ - The result suggests a p-value of 0.06 which is slightly greater than 0.05. Therefore, we can say that there is a slightly significant evidence to indicate that the means between two supplement types are the same. 
+ 
+```{r}
+Dose0.5 <- filter(ToothGrowth, dose==0.5)
+Dose1.0 <- filter(ToothGrowth, dose==1)
+t.test(Dose0.5$len, Dose1.0$len)
+
+Dose2.0 <- filter(ToothGrowth, dose==2)
+t.test(Dose0.5$len, Dose2.0$len)
+
+t.test(Dose1.0$len, Dose2.0$len)
+```
+ 
+ - Since the p-values from above are all smaller than the significant value 0.05, we will reject $H_{0}$ and conclude that there are significant evidences to indicate that the means between dose 0.5 and dose 1, dose 0.5 and dose 2, and dose 1 and dose 2 are different. 
+
+
+### Conclusions 
+
+ - By doing hypothesis tests, we can conclude that there is a significant evidence to say that the means of guinea pigs' tooth length between 2 supplement types of guinea pigs are the same. However, this evidence is not obvious since the p-value we obtained is 0.06 which is slightly greater than 0.05. 
+ - On the other hand, the tooth length differences in means between 3 unique doses are significant. 
+ - However, some assumptions we need to state before getting this conclusion and they are independence and normality. Independence states that our sample data must be randomly selected with biases. And normality assumes that the population distribution must be normal. 
+
+
+
+
+
+
+
+
